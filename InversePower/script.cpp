@@ -1,14 +1,6 @@
-/*
-THIS FILE IS A PART OF GTA V SCRIPT HOOK SDK
-http://dev-c.com
-(C) Alexander Blade 2015
-*/
-
 #include "script.h"
 #include <vector>
-
-//DWORD	vehUpdateTime;
-//DWORD	pedUpdateTime;
+#include <string>
 
 void update()
 {
@@ -57,17 +49,14 @@ void update()
 
 	// speed in m/s; 35m/s = 128km/h
 	float speed = ENTITY::GET_ENTITY_SPEED(PED::GET_VEHICLE_PED_IS_USING(playerPed));
-	
-
-
 	Vector3 rel_vector = ENTITY::GET_ENTITY_SPEED_VECTOR(PED::GET_VEHICLE_PED_IS_USING(playerPed), TRUE);
 	
 	float angle = acos(rel_vector.y / speed)* 180.0f / 3.14159265f;
 	if (isnan(angle))
 		angle = 0.0;
 
-	if (angle > 90.0)
-		angle = 180.0f - angle;
+	//if (angle > 90.0)
+	//	angle = 180.0f - angle;
 
 	float speed_mult = 0.0;
 	if (speed < base)
@@ -78,31 +67,70 @@ void update()
 	power_mult = power_mult + power_adj * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
 	torque_mult = torque_mult + torque_adj * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
 
-	VEHICLE::_SET_VEHICLE_ENGINE_POWER_MULTIPLIER(vehicle, power_mult);
-	VEHICLE::_SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER(vehicle, torque_mult);
+	int disablep = GetPrivateProfileInt("DEBUG", "DisableP", 0, "./InversePower.ini");
+	int disablet = GetPrivateProfileInt("DEBUG", "DisableT", 0, "./InversePower.ini");
+
+	if (disablep)
+		power_mult = 1.0;
+	if (disablet)
+		torque_mult = 1.0;
+
+	// works on keyboard and controller. param 1, don't know what it does
+	// pressed/max = 254. default/depressed = 127.
+	int accelval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleAccelerate);
+	int brakeval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleBrake);
+
+	// no need to worry about values since we compare them with each other
+	if (!(angle > 135 && brakeval > accelval + 12))
+	{
+		VEHICLE::_SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER(vehicle, torque_mult);
+		VEHICLE::_SET_VEHICLE_ENGINE_POWER_MULTIPLIER(vehicle, power_mult);
+	}
+	else
+	{
+		power_mult = 1.0;
+		torque_mult = 1.0;
+	}
 	
 	int debug = GetPrivateProfileInt("DEBUG", "Debug", 0, "./InversePower.ini");
 
 	if (debug)
 	{
-		Vector3 v = ENTITY::GET_ENTITY_COORDS(vehicle, TRUE);
-		float x, y;
-		if (GRAPHICS::_WORLD3D_TO_SCREEN2D(v.x, v.y, v.z, &x, &y)) {
-			char text[256];
-			sprintf_s(text, "^\n X %.02f\n Y %.02f\n Z %.02f\n Vel %.02f\n Mult %.02f\n Angle %.02f\n",
-				rel_vector.x, rel_vector.y, rel_vector.z, speed, power_mult, angle);
-			UI::SET_TEXT_FONT(0);
-			UI::SET_TEXT_SCALE(0.2f, 0.2f);
-			UI::SET_TEXT_COLOUR(255, 255, 255, 255);
-			UI::SET_TEXT_WRAP(0.0, 1.0);
-			UI::SET_TEXT_CENTRE(0);
-			UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
-			UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
-			UI::_SET_TEXT_ENTRY("STRING");
-			UI::_ADD_TEXT_COMPONENT_STRING(text);
-			UI::_DRAW_TEXT(x, y);
-			GRAPHICS::DRAW_RECT(x + 0.027f, y + 0.043f, 0.058f, 0.066f, 75, 75, 75, 75);
-		}
+		showDebugInfo3D(vehicle, rel_vector, speed, power_mult, torque_mult, angle);
+		/*char keys[128];
+		sprintf_s(keys, "Accel: %d\nBrake: %d", accelval, brakeval);
+		UI::SET_TEXT_FONT(0);
+		UI::SET_TEXT_SCALE(0.2f, 0.2f);
+		UI::SET_TEXT_COLOUR(255, 255, 255, 255);
+		UI::SET_TEXT_WRAP(0.0, 1.0);
+		UI::SET_TEXT_CENTRE(0);
+		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
+		UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
+		UI::_SET_TEXT_ENTRY("STRING");
+		UI::_ADD_TEXT_COMPONENT_STRING(keys);
+		UI::_DRAW_TEXT(0.01, 0.5);*/
+	}
+}
+
+void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float power_mult, float torque_mult, float angle)
+{
+	Vector3 v = ENTITY::GET_ENTITY_COORDS(vehicle, TRUE);
+	float x, y;
+	if (GRAPHICS::_WORLD3D_TO_SCREEN2D(v.x, v.y, v.z, &x, &y)) {
+		char text[256];
+		sprintf_s(text, "X %.02f\nY %.02f\nVel %.02f\nPowX %.02f\nTorX %.02f\nAngle %.02f",
+			rel_vector.x, rel_vector.y, speed, power_mult, torque_mult, angle);
+		UI::SET_TEXT_FONT(0);
+		UI::SET_TEXT_SCALE(0.2f, 0.2f);
+		UI::SET_TEXT_COLOUR(255, 255, 255, 255);
+		UI::SET_TEXT_WRAP(0.0, 1.0);
+		UI::SET_TEXT_CENTRE(0);
+		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
+		UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
+		UI::_SET_TEXT_ENTRY("STRING");
+		UI::_ADD_TEXT_COMPONENT_STRING(text);
+		UI::_DRAW_TEXT(x, y);
+		GRAPHICS::DRAW_RECT(x + 0.027f, y + 0.043f, 0.058f, 0.096f, 75, 75, 75, 75);
 	}
 }
 

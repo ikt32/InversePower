@@ -1,5 +1,5 @@
 // InversePower by ikt
-1.0
+1.1
 
 InversePower tries to counteract the fact that GTA V cuts off power when your 
 car starts gliding. This allows for a more realistic and less annoying driving 
@@ -7,7 +7,7 @@ experience. Drifting and slides are easier to maintain and adjust.
 
 This mod is inspired by Drift Assist by InfamousSabre and works similarly. The
 big difference is that speed is used as a negative feedback to make cars not
-accelerate unrealistically and swerve out of control at higher speeds.
+accelerate too much and swerve out of control at higher speeds.
 
 // Requirements
 GTA V
@@ -23,14 +23,14 @@ Extract InversePower.asi and InversePower.ini to your GTA V game folder.
 This plugin won't work if engine power or torque are modified other scripts.
 
 The ini file will look like this. These are the default values and should be 
-good for usage with Killatomatoes Realistic Driving mod.
+good for usage with Killatomate's Realistic Driving mod.
 
 Don't change the section names (between the [ ] brackets).
 
 [CONFIG]
 Power = 100
-Torque = 100
-Angle = 300
+Torque = 80
+Angle = 350
 Speed = 200
 Slope = 35
 
@@ -62,7 +62,10 @@ Have fun!
 
 // Changelog
 1.0 - Initial version
-
+1.1 - Allow for angles >> 90 to get a power boost
+	- Clean up debug window
+	- Changed default values for less erratic behavior
+	
 // License
 Just don't be a donkey butt. If this archive is redistributed, include so this
 readme.txt so users know what these configuration options do. I'm not liable
