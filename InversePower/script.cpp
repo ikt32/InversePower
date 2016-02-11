@@ -2,10 +2,67 @@
 #include <vector>
 #include <string>
 
+bool underGear = false;
+Player player;
+Ped playerPed;
+Vehicle vehicle;
+
+float speed = 0.0;
+Vector3 rel_vector = { 0.0f, 0, 0.0f, 0, 0.0f, 0 };
+float angle = 0.0;
+float deadzone = 0.0;
+
+float base = 35.0;
+float power_adj = 1.0;
+float torque_adj = 1.0;
+float angle_impact = 3.0;
+float speed_impact = 2.0;
+
+float speed_mult = 0.0;
+float power_mult = 1.0;
+float torque_mult = 1.0;
+
+int accelval = 127;
+int brakeval = 127;
+
+int disablep = 0;
+int disablet = 0;
+int debug = 0;
+
+void readSettings() {
+	disablep = GetPrivateProfileInt("DEBUG", "DisableP", 0, "./InversePower.ini");
+	disablet = GetPrivateProfileInt("DEBUG", "DisableT", 0, "./InversePower.ini");
+
+	power_adj = GetPrivateProfileInt("CONFIG", "Power", 100, "./InversePower.ini") / 100.0f;
+	torque_adj = GetPrivateProfileInt("CONFIG", "Torque", 100, "./InversePower.ini") / 100.0f;
+
+	angle_impact = GetPrivateProfileInt("CONFIG", "Angle", 300, "./InversePower.ini") / 100.0f;
+	speed_impact = GetPrivateProfileInt("CONFIG", "Speed", 200, "./InversePower.ini") / 100.0f;
+
+	base = GetPrivateProfileInt("CONFIG", "Slope", 35, "./InversePower.ini") / 1.0f;
+
+	deadzone = GetPrivateProfileInt("CONFIG", "Deadzone", 0, "./InversePower.ini") / 1.0f;
+
+	debug = GetPrivateProfileInt("DEBUG", "Debug", 0, "./InversePower.ini");
+}
+
+void showText(float x, float y, float scale, char * text) {
+	UI::SET_TEXT_FONT(0);
+	UI::SET_TEXT_SCALE(scale, scale);
+	UI::SET_TEXT_COLOUR(255, 255, 255, 255);
+	UI::SET_TEXT_WRAP(0.0, 1.0);
+	UI::SET_TEXT_CENTRE(0);
+	UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
+	UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
+	UI::_SET_TEXT_ENTRY("STRING");
+	UI::_ADD_TEXT_COMPONENT_STRING(text);
+	UI::_DRAW_TEXT(x, y);
+}
+
 void update()
 {
-	Player player = PLAYER::PLAYER_ID();
-	Ped playerPed = PLAYER::PLAYER_PED_ID();
+	player = PLAYER::PLAYER_ID();
+	playerPed = PLAYER::PLAYER_PED_ID();
 
 	// check if player ped exists and control is on (e.g. not in a cutscene)
 	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player))
@@ -15,76 +72,54 @@ void update()
 	if (ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE))
 		return;
 
-	Vehicle vehicle = PED::GET_VEHICLE_PED_IS_USING(playerPed);
+	vehicle = PED::GET_VEHICLE_PED_IS_USING(playerPed);
 	if (!VEHICLE::IS_THIS_MODEL_A_CAR(ENTITY::GET_ENTITY_MODEL(vehicle)))
 		return;
 
-	// default values; overwritten by config
+	if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, ControlEnter))
+		readSettings();
 
-	// how much power or torque are adjusted
-	float power_adj = 1.0;
-	float torque_adj = 1.0;
+	// Compatibility with Gears/Manual Transmission mod
+	if (DECORATOR::DECOR_GET_INT(vehicle, "hunt_score") == 2) {
+		underGear = true;
+	}
+	else {
+		underGear = false;
+	}
 
-	// how much angle or speed impacts power/torque adjustment
-	float angle_impact = 3.00;
-	float speed_impact = 2.00;
-
-	// we want 0 additional pwr @ >= 35m/s, full additional pwr @ 0m/s
-	// speed where adjustment adjustment by speed stops
-	float base = 35.0;
-
-	power_adj = GetPrivateProfileInt("CONFIG", "Power", 100, "./InversePower.ini") / 100.0f;
-	torque_adj = GetPrivateProfileInt("CONFIG", "Torque", 100, "./InversePower.ini") / 100.0f;
-
-	angle_impact = GetPrivateProfileInt("CONFIG", "Angle", 300, "./InversePower.ini") / 100.0f;
-	speed_impact = GetPrivateProfileInt("CONFIG", "Speed", 200, "./InversePower.ini") / 100.0f;
-
-	base = GetPrivateProfileInt("CONFIG", "Slope", 35, "./InversePower.ini") / 1.0f;
 	if (base < 0.0)
 		base = 35.0;
 
-	// starting values; don't change
-	float power_mult = 1.0;
-	float torque_mult = 1.0;
-
 	// speed in m/s; 35m/s = 128km/h
-	float speed = ENTITY::GET_ENTITY_SPEED(PED::GET_VEHICLE_PED_IS_USING(playerPed));
-	Vector3 rel_vector = ENTITY::GET_ENTITY_SPEED_VECTOR(PED::GET_VEHICLE_PED_IS_USING(playerPed), TRUE);
+	speed = ENTITY::GET_ENTITY_SPEED(vehicle);
+	rel_vector = ENTITY::GET_ENTITY_SPEED_VECTOR(vehicle, true);
 	
-	float angle = acos(rel_vector.y / speed)* 180.0f / 3.14159265f;
+	angle = acos(rel_vector.y / speed)* 180.0f / 3.14159265f;
 	if (isnan(angle))
 		angle = 0.0;
 
-	//if (angle > 90.0)
-	//	angle = 180.0f - angle;
-
-	float speed_mult = 0.0;
 	if (speed < base)
 	{
 		speed_mult = (base - speed) / base;
 	}
 
-	power_mult = power_mult + power_adj * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
-	torque_mult = torque_mult + torque_adj * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
-
-	int disablep = GetPrivateProfileInt("DEBUG", "DisableP", 0, "./InversePower.ini");
-	int disablet = GetPrivateProfileInt("DEBUG", "DisableT", 0, "./InversePower.ini");
-
-	if (disablep)
-		power_mult = 1.0;
-	if (disablet)
-		torque_mult = 1.0;
+	power_mult  = 1.0f + power_adj  * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
+	torque_mult = 1.0f + torque_adj * (((angle / 90) * angle_impact) + ((angle / 90) * speed_mult * speed_impact));
 
 	// works on keyboard and controller. param 1, don't know what it does
 	// pressed/max = 254. default/depressed = 127.
-	int accelval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleAccelerate);
-	int brakeval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleBrake);
+	accelval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleAccelerate);
+	brakeval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleBrake);
 
 	// no need to worry about values since we compare them with each other
-	if (!(angle > 135 && brakeval > accelval + 12))
+	if (!(angle > 135 && brakeval > accelval + 12) && angle > deadzone && !underGear)
 	{
-		VEHICLE::_SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER(vehicle, torque_mult);
-		VEHICLE::_SET_VEHICLE_ENGINE_POWER_MULTIPLIER(vehicle, power_mult);
+		if (!disablet) {
+			VEHICLE::_SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER(vehicle, torque_mult);
+		}
+		if (!disablep) {
+			VEHICLE::_SET_VEHICLE_ENGINE_POWER_MULTIPLIER(vehicle, power_mult);
+		}
 	}
 	else
 	{
@@ -92,23 +127,9 @@ void update()
 		torque_mult = 1.0;
 	}
 	
-	int debug = GetPrivateProfileInt("DEBUG", "Debug", 0, "./InversePower.ini");
-
 	if (debug)
 	{
 		showDebugInfo3D(vehicle, rel_vector, speed, power_mult, torque_mult, angle);
-		/*char keys[128];
-		sprintf_s(keys, "Accel: %d\nBrake: %d", accelval, brakeval);
-		UI::SET_TEXT_FONT(0);
-		UI::SET_TEXT_SCALE(0.2f, 0.2f);
-		UI::SET_TEXT_COLOUR(255, 255, 255, 255);
-		UI::SET_TEXT_WRAP(0.0, 1.0);
-		UI::SET_TEXT_CENTRE(0);
-		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
-		UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
-		UI::_SET_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING(keys);
-		UI::_DRAW_TEXT(0.01, 0.5);*/
 	}
 }
 
@@ -136,6 +157,7 @@ void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float pow
 
 void main()
 {
+	readSettings();
 	while (true)
 	{
 		update();
