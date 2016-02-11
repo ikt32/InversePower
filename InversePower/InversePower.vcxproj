@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin\$(Configuration)</OutDir>
-    <IntDir>tmp\$(Configuration)</IntDir>
+    <OutDir>bin\</OutDir>
+    <IntDir>tmp\</IntDir>
     <TargetExt>.asi</TargetExt>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -105,7 +105,7 @@
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalOptions>..\..\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>..\..\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,10 +141,10 @@
     <ClCompile Include="script.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\enums.h" />
-    <ClInclude Include="..\..\inc\main.h" />
-    <ClInclude Include="..\..\inc\natives.h" />
-    <ClInclude Include="..\..\inc\types.h" />
+    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h" />
+    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
+    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
+    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="script.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
