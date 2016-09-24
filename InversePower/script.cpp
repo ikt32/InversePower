@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-bool underGear = false;
+//bool underGear = false;
 Player player;
 Ped playerPed;
 Vehicle vehicle;
@@ -55,7 +55,7 @@ void showText(float x, float y, float scale, char * text) {
 	UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
 	UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
 	UI::_SET_TEXT_ENTRY("STRING");
-	UI::_ADD_TEXT_COMPONENT_STRING(text);
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
 	UI::_DRAW_TEXT(x, y);
 }
 
@@ -79,13 +79,13 @@ void update()
 	if (CONTROLS::IS_CONTROL_JUST_RELEASED(0, ControlEnter))
 		readSettings();
 
-	// Compatibility with Gears/Manual Transmission mod
-	if (DECORATOR::DECOR_GET_INT(vehicle, "hunt_score") == 2) {
-		underGear = true;
-	}
-	else {
-		underGear = false;
-	}
+	//// Compatibility with Gears/Manual Transmission mod
+	//if (DECORATOR::DECOR_GET_INT(vehicle, "hunt_score") == 2) {
+	//	underGear = true;
+	//}
+	//else {
+	//	underGear = false;
+	//}
 
 	if (base < 0.0)
 		base = 35.0;
@@ -112,7 +112,7 @@ void update()
 	brakeval = CONTROLS::GET_CONTROL_VALUE(0, ControlVehicleBrake);
 
 	// no need to worry about values since we compare them with each other
-	if (!(angle > 135 && brakeval > accelval + 12) && angle > deadzone && !underGear)
+	if (!(angle > 135 && brakeval > accelval + 12) && angle > deadzone)
 	{
 		if (!disablet) {
 			VEHICLE::_SET_VEHICLE_ENGINE_TORQUE_MULTIPLIER(vehicle, torque_mult);
@@ -149,7 +149,7 @@ void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float pow
 		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
 		UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
 		UI::_SET_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING(text);
+		UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
 		UI::_DRAW_TEXT(x, y);
 		GRAPHICS::DRAW_RECT(x + 0.027f, y + 0.043f, 0.058f, 0.096f, 75, 75, 75, 75);
 	}
