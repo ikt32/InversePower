@@ -54,9 +54,9 @@ void showText(float x, float y, float scale, char * text) {
 	UI::SET_TEXT_CENTRE(0);
 	UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
 	UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
-	UI::_SET_TEXT_ENTRY("STRING");
+	UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
 	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
-	UI::_DRAW_TEXT(x, y);
+	UI::END_TEXT_COMMAND_DISPLAY_TEXT(x, y);
 }
 
 void update()
@@ -137,7 +137,7 @@ void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float pow
 {
 	Vector3 v = ENTITY::GET_ENTITY_COORDS(vehicle, TRUE);
 	float x, y;
-	if (GRAPHICS::_WORLD3D_TO_SCREEN2D(v.x, v.y, v.z, &x, &y)) {
+	if (GRAPHICS::GET_SCREEN_COORD_FROM_WORLD_COORD(v.x, v.y, v.z, &x, &y)) {
 		char text[256];
 		sprintf_s(text, "X %.02f\nY %.02f\nVel %.02f\nPowX %.02f\nTorX %.02f\nAngle %.02f",
 			rel_vector.x, rel_vector.y, speed, power_mult, torque_mult, angle);
@@ -148,9 +148,9 @@ void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float pow
 		UI::SET_TEXT_CENTRE(0);
 		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
 		UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
-		UI::_SET_TEXT_ENTRY("STRING");
+		UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
 		UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text);
-		UI::_DRAW_TEXT(x, y);
+		UI::END_TEXT_COMMAND_DISPLAY_TEXT(x, y);
 		GRAPHICS::DRAW_RECT(x + 0.027f, y + 0.043f, 0.058f, 0.096f, 75, 75, 75, 75);
 	}
 }
