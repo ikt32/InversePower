@@ -13,5 +13,3 @@ http://dev-c.com
 #include "..\..\ScriptHookV_SDK\inc\main.h"
 
 void ScriptMain();
-// jesus fuck isn't there a better way?
-void showDebugInfo3D(Vehicle vehicle, Vector3 rel_vector, float speed, float power_mult, float torque_mult, float angle);
