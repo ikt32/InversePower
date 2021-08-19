@@ -14,8 +14,24 @@ ipch/
 *.user
 *.sdf
 *.suo
+*.db
+.vs/
 
 # Temporary OS files
 .DS_Store
 Thumbs.db
-*.db
+
+# NuGet stuff
+[Pp]ackages/
+packages.config
+
+*.log
+*.exe
+
+# Temp
+Server/
+*.TMP
+doc/changelog.pdf
+
+README.pdf
+GhostReplay/GitInfo.h

@@ -1,27 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="script.cpp" />
+    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="Util\UI.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptSettings.cpp" />
+    <ClCompile Include="SettingsCommon.cpp" />
+    <ClCompile Include="Util\Logger.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="script.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h">
-      <Filter>include</Filter>
+    <ClInclude Include="Script.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
+      <Filter>ScriptHookV</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h">
+      <Filter>ScriptHookV</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h">
+      <Filter>ScriptHookV</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h">
+      <Filter>ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h">
+      <Filter>ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\UI.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="Util\Math.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptSettings.hpp" />
+    <ClInclude Include="SettingsCommon.hpp" />
+    <ClInclude Include="Util\Logger.hpp">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="include">
-      <UniqueIdentifier>{83cd848d-4590-4c3c-8d31-7194eff86b46}</UniqueIdentifier>
+    <Filter Include="ScriptHookV">
+      <UniqueIdentifier>{f7557c6f-6348-4b3a-85e5-71bec21562fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{1782c6d6-11a5-43f7-af8a-2fc290d8b656}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
