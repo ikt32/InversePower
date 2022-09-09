@@ -20,7 +20,7 @@ public:
 
     template <typename... Args>
     static void Write(LogLevel level, const std::string& fmt, Args &&...args) {
-        Write(level, std::format(fmt, std::forward<Args>(args)...));
+        Write(level, std::vformat(fmt, std::make_format_args(std::forward<Args>(args)...)));
     }
 
 private:
